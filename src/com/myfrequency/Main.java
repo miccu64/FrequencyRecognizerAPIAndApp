@@ -11,22 +11,6 @@ import java.nio.ByteBuffer;
 
 public class Main {
 
-    private static byte[] loadSoundFile() throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        BufferedInputStream in = new BufferedInputStream(new FileInputStream("Splish_Splash.wav"));
-
-        int read;
-        byte[] buff = new byte[1024];
-        while ((read = in.read(buff)) > 0)
-        {
-            out.write(buff, 0, read);
-        }
-        out.flush();
-        return out.toByteArray();
-    }
-
-
-
     public static void main(String[] args) throws IOException, LineUnavailableException {
         //byte[] sound = loadSoundFile();
         //FloatFFT_1D fft = new FloatFFT_1D(longSound.length);
