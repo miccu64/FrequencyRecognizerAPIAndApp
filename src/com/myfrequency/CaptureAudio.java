@@ -13,8 +13,8 @@ public class CaptureAudio {
 
     public CaptureAudio () {
         //set up capture parameters
-        float sampleRate = 8000.0F;//8000,16000,22050,44100 - only even numbers
-        int sampleSizeInBits = 8;//8,16
+        float sampleRate = 44100.0F;//8000,16000,22050,44100 - only even numbers
+        int sampleSizeInBits = 16;//8,16
         int channels = 1;//only 1 will work
         boolean signed = true;//true,false
         boolean bigEndian = false;//false - the script is written for little endian

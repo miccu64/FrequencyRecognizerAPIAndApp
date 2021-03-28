@@ -33,7 +33,8 @@ public class ProcessSound {
         //find max magnitude
         double max = 0;
         int index = 0;
-        for (int i=0; i<magnitudes.length; i++) {
+        //from 1, bcs 0Hz is somehow too strong
+        for (int i=1; i<magnitudes.length; i++) {
             if (magnitudes[i] > max){
                 max = magnitudes[i];
                 index = i;
@@ -83,7 +84,8 @@ public class ProcessSound {
             //convert bytes to float (little endian)
             float sample = 0;
             for (int part = 0; part < frameSize; part++) {
-                sample += bytes[pos * frameSize + part] << (8 * part);
+                int help = bytes[pos * frameSize + part] & 0xff;
+                sample += help << (8 * part);
             }
             res[pos] = sample;
         }
