@@ -9,14 +9,13 @@ import javax.sound.sampled.TargetDataLine;
 
 public class CaptureAudio {
 
-    private TargetDataLine targetDataLine;
     private final AudioFormat audioFormat;
 
     public CaptureAudio () {
         //set up capture parameters
-        float sampleRate = 8000.0F;//8000,11025,16000,22050,44100
+        float sampleRate = 8000.0F;//8000,16000,22050,44100 - only even numbers
         int sampleSizeInBits = 8;//8,16
-        int channels = 1;//1,2
+        int channels = 1;//only 1 will work
         boolean signed = true;//true,false
         boolean bigEndian = false;//false - the script is written for little endian
         audioFormat = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
@@ -25,12 +24,12 @@ public class CaptureAudio {
     public void captureAudio() {
         try{
             DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,audioFormat);
-            targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
+            TargetDataLine targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
             targetDataLine.open(audioFormat);
             targetDataLine.start();
 
             //buffer for sound samples
-            int len = (int) audioFormat.getSampleRate();
+            int len = (int) audioFormat.getSampleRate() * audioFormat.getFrameSize();
             byte[] bufByte = new byte[len];
 
             ProcessSound process = new ProcessSound(audioFormat);

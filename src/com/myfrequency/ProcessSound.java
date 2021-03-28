@@ -14,12 +14,14 @@ public class ProcessSound {
         format = _format;
         len = (int) format.getSampleRate();
         //init FFT with number of FFTsamples, which we want to get
-        fft = new FloatFFT_1D((len / format.getFrameSize()));
+        //we want get as much as frequency is, that's why need to derive by frameSize
+        //frameSize can take 1 or 2 places in buffer
+        fft = new FloatFFT_1D(len);
     }
 
     void doProcessing(byte[] bufByte) {
         //convert to floats
-        float[] bufFloat = ProcessSound.bytesToFloat(bufByte, format);
+        float[] bufFloat = bytesToFloat(bufByte, format);
 
         //save FFT result to bufFloat
         //realForward, bcs we have got real data
@@ -30,9 +32,15 @@ public class ProcessSound {
 
         //find max magnitude
         double max = 0;
-        for (double m: magnitudes) {
-            if (m > max) max = m;
+        int index = 0;
+        for (int i=0; i<magnitudes.length; i++) {
+            if (magnitudes[i] > max){
+                max = magnitudes[i];
+                index = i;
+            }
         }
+        double freq = index * format.getSampleRate() / len;
+
         System.out.println("aaa");
     }
 
@@ -75,7 +83,7 @@ public class ProcessSound {
             //convert bytes to float (little endian)
             float sample = 0;
             for (int part = 0; part < frameSize; part++) {
-                sample += bytes[pos * frameSize + part] << 8 * part;
+                sample += bytes[pos * frameSize + part] << (8 * part);
             }
             res[pos] = sample;
         }
