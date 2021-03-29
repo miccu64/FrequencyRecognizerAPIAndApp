@@ -4,14 +4,25 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.TargetDataLine;
+import java.util.Observable;
 
 
-
-public class CaptureAudio {
+public class CaptureAudioObservable extends Observable {
 
     private final AudioFormat audioFormat;
+    private float frequency;
 
-    public CaptureAudio () {
+    public float getFrequency() {
+        return frequency;
+    }
+
+    private void setFrequency(float _freq) {
+        frequency = _freq;
+        setChanged();
+        notifyObservers();
+    }
+
+    public CaptureAudioObservable () {
         //set up capture parameters
         float sampleRate = 44100.0F;//8000,16000,22050,44100 - only even numbers
         int sampleSizeInBits = 16;//8,16
@@ -37,7 +48,7 @@ public class CaptureAudio {
                 while (true) {
                     int length = targetDataLine.read(bufByte, 0, len);
                     if (length > 0) {
-                        process.doProcessing(bufByte);
+                        setFrequency(process.doProcessing(bufByte));
                     }
                 }
                 //byteArrayOutputStream.close();

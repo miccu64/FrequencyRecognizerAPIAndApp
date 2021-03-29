@@ -1,21 +1,40 @@
 package com.myfrequency;
 
-import org.jtransforms.fft.FloatFFT_1D;
+import javax.swing.*;
+import java.util.Observable;
+import java.util.Observer;
 
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.TargetDataLine;
-import java.io.*;
-import java.nio.ByteBuffer;
+public class Main extends JFrame implements Observer {
+    private static CaptureAudioObservable audio;
+    private JPanel panel1;
+    private JLabel freqLabel;
+    private JTextField textField1;
+    private float frequency = 0;
 
-public class Main {
+    public Main() {
+        JFrame frame = new JFrame("Frequency recognizer");
+        frame.setContentPane(panel1);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.pack();
+        frame.setVisible(true);
+    }
 
-    public static void main(String[] args) throws IOException, LineUnavailableException {
-        //byte[] sound = loadSoundFile();
-        //FloatFFT_1D fft = new FloatFFT_1D(longSound.length);
+    @Override
+    public void update(Observable o, Object arg) {
+        audio = (CaptureAudioObservable) o;
+        frequency = audio.getFrequency();
+        freqLabel.setText("" + frequency);
+    }
 
-        CaptureAudio captureAudio = new CaptureAudio();
-        captureAudio.captureAudio();
+
+    public static void main(String[] args) {
+        //GUI open
+        new Main();
+
+        //make observer for notifying when frequency is changed
+        audio = new CaptureAudioObservable();
+        Main observer = new Main();
+        audio.addObserver(observer);
+        audio.captureAudio();
     }
 }

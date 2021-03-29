@@ -19,7 +19,7 @@ public class ProcessSound {
         fft = new FloatFFT_1D(len);
     }
 
-    void doProcessing(byte[] bufByte) {
+    float doProcessing(byte[] bufByte) {
         //convert to floats
         float[] bufFloat = bytesToFloat(bufByte, format);
 
@@ -40,9 +40,11 @@ public class ProcessSound {
                 index = i;
             }
         }
-        double freq = index * format.getSampleRate() / len;
-
-        System.out.println("aaa");
+        //f = i * Fs / N
+        //Fs = sample rate (Hz)
+        //i = bin index
+        //N = FFT size
+        return index * format.getSampleRate() / len;
     }
 
     private static Pair<float[], float[]> getRealAndImag (float[] bufFloat) {
