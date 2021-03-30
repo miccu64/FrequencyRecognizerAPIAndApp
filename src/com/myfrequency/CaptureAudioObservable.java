@@ -61,8 +61,6 @@ public class CaptureAudioObservable extends Observable {
             System.exit(0);
         }
     }
-
-
 }
 
 
