@@ -17,7 +17,7 @@
         <properties>
           <horizontalAlignment value="0"/>
           <horizontalTextPosition value="0"/>
-          <text value="Częstotliwość"/>
+          <text value="Obecna częstotliwość"/>
           <verticalAlignment value="0"/>
           <verticalTextPosition value="0"/>
         </properties>

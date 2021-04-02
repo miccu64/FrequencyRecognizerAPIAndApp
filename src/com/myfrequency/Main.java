@@ -10,6 +10,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 public class Main extends JFrame implements Observer {
+    //instance for audio capture
     private static CaptureAudioObservable audio;
     private JPanel panel1;
     private JLabel freqLabel;
@@ -17,6 +18,8 @@ public class Main extends JFrame implements Observer {
     private JButton addButton;
     private JButton deleteButton;
     private float frequency = 0;
+    //model for changing data from GUI
+    private DefaultTableModel model;
 
     //init GUI
     public Main() {
@@ -33,7 +36,6 @@ public class Main extends JFrame implements Observer {
             model.addRow(new Object[] {"a", 0});
         });
         deleteButton.addActionListener(e -> {
-            DefaultTableModel model = (DefaultTableModel) keyTable.getModel();
             int[] rows = keyTable.getSelectedRows();
             for(int i=0;i<rows.length;i++) {
                 model.removeRow(rows[i] - i);
@@ -50,11 +52,9 @@ public class Main extends JFrame implements Observer {
     }
 
     public static void main(String[] args) {
-        //GUI open
-        new Main();
-
         //make observer for notifying when frequency is changed
         audio = new CaptureAudioObservable();
+        //GUI open
         Main observer = new Main();
         audio.addObserver(observer);
         audio.captureAudio();
@@ -66,7 +66,7 @@ public class Main extends JFrame implements Observer {
                 {"B", 600}
         };
         String[] colNames = {"Przycisk", "Częstotliwość"};
-        DefaultTableModel model = new DefaultTableModel(listData, colNames);
+        model = new DefaultTableModel(listData, colNames);
         keyTable = new JTable(model);
     }
 }
