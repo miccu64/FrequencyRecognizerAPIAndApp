@@ -2,10 +2,7 @@ package com.myfrequency;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -17,7 +14,10 @@ public class Main extends JFrame implements Observer {
     private JTable keyTable;
     private JButton addButton;
     private JButton deleteButton;
+    private JButton startButton;
+    private JButton stopButton;
     private float frequency = 0;
+    private boolean work;
     //model for changing data from GUI
     private DefaultTableModel model;
 
@@ -41,14 +41,24 @@ public class Main extends JFrame implements Observer {
                 model.removeRow(rows[i] - i);
             }
         });
+        startButton.addActionListener(e -> {
+            work = true;
+        });
+        stopButton.addActionListener(e -> {
+            work = false;
+        });
     }
 
     //perform operations on frequency change
     @Override
     public void update(Observable o, Object arg) {
         audio = (CaptureAudioObservable) o;
-        frequency = audio.getFrequency();
-        freqLabel.setText("" + frequency);
+        float newFrequency = audio.getFrequency();
+        freqLabel.setText("" + newFrequency);
+        if (work) {
+
+        }
+        frequency = newFrequency;
     }
 
     public static void main(String[] args) {

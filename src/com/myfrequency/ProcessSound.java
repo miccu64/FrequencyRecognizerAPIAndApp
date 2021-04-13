@@ -5,11 +5,13 @@ import org.jtransforms.fft.FloatFFT_1D;
 
 import javax.sound.sampled.AudioFormat;
 
+import static java.lang.Math.log;
+
 public class ProcessSound {
     private final FloatFFT_1D fft;
     private final AudioFormat format;
-    private static final int moreSamples = 1;
     private final int len;
+    //buf containing also older values
     private final float[] copiedBufFloat;
 
     public ProcessSound(AudioFormat _format) {
@@ -17,23 +19,12 @@ public class ProcessSound {
         //init FFT with number of FFTsamples, which we want to get
         //that's why we need to derive by frame size
         //frameSize can take 1 or 2 places in buffer
-        len = (int) (format.getSampleRate() / format.getFrameSize() * moreSamples);
+        len = (int) (format.getSampleRate() / format.getFrameSize() * 2);//*2 to get longer buffer
         fft = new FloatFFT_1D(len);
         copiedBufFloat = new float[len];
     }
 
-    private float[] resample (float[] input) {
-        // output ought to be 6 times as large as input (48000/8000).
-        float[] output = new float[len];
-        for (int i = 0; i < input.length - 1; i++) {
-            for (int j = 0; j<moreSamples; j++) {
-                output[i*6 + j] = input[i] * (moreSamples-j) / moreSamples + input[i + 1] * j / moreSamples;
-            }
-        }
-        return output;
-    }
-
-    float doProcessing(byte[] bufByte) {
+    public float doProcessing(byte[] bufByte) {
         //convert to floats and resample it
         float[] bufFloat = bytesToFloat(bufByte, format);
         //shift data in buffer and place some new data
@@ -64,11 +55,17 @@ public class ProcessSound {
                 index = i;
             }
         }
+
         //f = i * Fs / N
         //Fs = sample rate (Hz)
         //i = bin index
         //N = FFT size
-        return index * format.getSampleRate() / len;
+        //return index * format.getSampleRate() / len;
+
+        //Gaussian interpolation for getting in-between frequency
+        double inter_bin = index + log(magnitudes[index+1]/magnitudes[index-1])*0.5/log(magnitudes[index]*magnitudes[index]/(magnitudes[index+1]*magnitudes[index-1]));
+        double res = format.getSampleRate() * inter_bin / currentBuf.length;
+        return (float) Math.round(res * 10) / 10;
     }
 
     private Pair<float[], float[]> getRealAndImag (float[] bufFloat) {
@@ -100,7 +97,7 @@ public class ProcessSound {
     }
 
 
-    public float[] bytesToFloat(byte[] bytes, AudioFormat format) {
+    private float[] bytesToFloat(byte[] bytes, AudioFormat format) {
         int frameSize = format.getFrameSize();
         float[] res = new float[bytes.length / frameSize];
         for (int pos = 0; pos < bytes.length / frameSize; pos++) {
