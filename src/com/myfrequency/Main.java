@@ -5,6 +5,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Vector;
 
 public class Main extends JFrame implements Observer {
     //instance for audio capture
@@ -27,6 +28,7 @@ public class Main extends JFrame implements Observer {
         freqLabel.setFont(new Font(freqLabel.getFont().getName(), Font.PLAIN, 26));
         frame.setContentPane(panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setMinimumSize(new Dimension(500, 500));
         frame.pack();
         frame.setVisible(true);
 
@@ -37,7 +39,7 @@ public class Main extends JFrame implements Observer {
         });
         deleteButton.addActionListener(e -> {
             int[] rows = keyTable.getSelectedRows();
-            for(int i=0;i<rows.length;i++) {
+            for(int i=0; i<rows.length; i++) {
                 model.removeRow(rows[i] - i);
             }
         });
@@ -49,14 +51,26 @@ public class Main extends JFrame implements Observer {
         });
     }
 
+    private boolean compareFreq(double freq1, double freq2) {
+        double res = 110;
+        double root = Math.pow(2, (double) 1/12);//ZZACZYNA SIE OD A (110Hz)
+        //dzieli sie lub mnozy x razy przez to
+        return false;
+    }
+
     //perform operations on frequency change
     @Override
     public void update(Observable o, Object arg) {
         audio = (CaptureAudioObservable) o;
         float newFrequency = audio.getFrequency();
         freqLabel.setText("" + newFrequency);
-        if (work) {
+        //3000Hz will be max
+        if (work && frequency == newFrequency && frequency < 3000) {
+            DefaultTableModel model = (DefaultTableModel) keyTable.getModel();
+            Vector vector = model.getDataVector();
+            for (Object obj : vector) {
 
+            }
         }
         frequency = newFrequency;
     }

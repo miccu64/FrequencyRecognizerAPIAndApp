@@ -6,6 +6,8 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.TargetDataLine;
 import java.util.Observable;
 
+import static java.lang.Thread.sleep;
+
 
 public class CaptureAudioObservable extends Observable {
 
@@ -23,7 +25,7 @@ public class CaptureAudioObservable extends Observable {
         notifyObservers();
     }
 
-    public CaptureAudioObservable () {
+    public CaptureAudioObservable() {
         //set up capture parameters
         float sampleRate = 44100.0F;//8000,16000,22050,44100 - only even numbers
         int sampleSizeInBits = 16;//8,16
@@ -33,38 +35,44 @@ public class CaptureAudioObservable extends Observable {
         audioFormat = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
     }
 
-    public void captureAudio() {
-        try{
-            DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class,audioFormat);
+    private TargetDataLine initDataLine() {
+        DataLine.Info dataLineInfo = new DataLine.Info(TargetDataLine.class, audioFormat);
+        try {
             TargetDataLine targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
             targetDataLine.open(audioFormat);
-            targetDataLine.start();
-
-            //buffer for sound samples - DERIVED BY 5 to get more frequent changes
-            int len = (int) audioFormat.getSampleRate() * audioFormat.getFrameSize() / 5;
-
-            byte[] bufByte = new byte[len];
-            ProcessSound process = new ProcessSound(audioFormat);
-            try {
-                while (true) {
-                    //read data form input
-                    int length = targetDataLine.read(bufByte, 0, len);
-                    if (length > 0) {
-                        float newFreq = process.doProcessing(bufByte);
-                        //notify observers if found new frequency
-                        if (Float.compare(newFreq, frequency) != 0)
-                            setFrequency(newFreq);
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println(e);
-                System.exit(0);
-            }
+            return targetDataLine;
         } catch (Exception e) {
-            System.out.println(e);
-            System.exit(0);
+            try {
+                sleep(300);
+            } catch (Exception ignored) {
+            }
+            return null;
+        }
+    }
+
+    public void captureAudio() {
+        //if missing input, wait for add new one by user
+        TargetDataLine targetDataLine;
+        do {
+            targetDataLine = initDataLine();
+        } while (targetDataLine == null);
+        targetDataLine.start();
+
+        //buffer for sound samples - DERIVED BY 5 to get more frequent changes
+        int len = (int) audioFormat.getSampleRate() * audioFormat.getFrameSize() / 5;
+
+        byte[] bufByte = new byte[len];
+        ProcessSound process = new ProcessSound(audioFormat);
+
+        while (true) {
+            //read data form input
+            int length = targetDataLine.read(bufByte, 0, len);
+            if (length > 0) {
+                float newFreq = process.doProcessing(bufByte);
+                //notify observers if found new frequency
+                if (Float.compare(newFreq, frequency) != 0)
+                    setFrequency(newFreq);
+            }
         }
     }
 }
-
-
