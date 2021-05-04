@@ -2,10 +2,10 @@ package com.myfrequency;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Vector;
+import java.util.*;
+import java.util.List;
 
 public class Main extends JFrame implements Observer {
     //instance for audio capture
@@ -21,6 +21,8 @@ public class Main extends JFrame implements Observer {
     private boolean work;
     //model for changing data from GUI
     private DefaultTableModel model;
+    //contains possible sounds in Hz
+    private List<Float> soundList;
 
     //init GUI
     public Main() {
@@ -52,6 +54,9 @@ public class Main extends JFrame implements Observer {
     }
 
     private boolean compareFreq(double freq1, double freq2) {
+        //fast compare for big difference to improve optimization
+        if (Math.abs(freq1-freq2) > 150)
+            return false;
         double res = 110;
         double root = Math.pow(2, (double) 1/12);//ZZACZYNA SIE OD A (110Hz)
         //dzieli sie lub mnozy x razy przez to
@@ -65,7 +70,16 @@ public class Main extends JFrame implements Observer {
         float newFrequency = audio.getFrequency();
         freqLabel.setText("" + newFrequency);
         //3000Hz will be max
-        if (work && frequency == newFrequency && frequency < 3000) {
+        if (work && newFrequency < 2000 && newFrequency > 50) {
+            for (int i=0; i<soundList.size(); i++) {
+                if (soundList.get(i).compareTo(newFrequency) < 0) {
+                    float diffDown = (soundList.get(i) - soundList.get(i-1)) / 2;
+                    float diffUp = (soundList.get(i+1) - soundList.get(i)) / 2;
+
+
+                }
+            }
+
             DefaultTableModel model = (DefaultTableModel) keyTable.getModel();
             Vector vector = model.getDataVector();
             for (Object obj : vector) {
@@ -84,13 +98,43 @@ public class Main extends JFrame implements Observer {
         audio.captureAudio();
     }
 
+    private float round(float num) {
+        int der = (int) Math.pow(10, 1);
+        num = num * der;
+        num = Math.round(num);
+        return num / der;
+    }
+
     private void createUIComponents() {
+        //init soundSet - start from 110Hz and derive/multiply it by mult
+        soundList = new ArrayList<>();
+        float initial = 110;
+        soundList.add(initial);
+        float mult = (float) Math.pow(2, (double) 1/12);
+        for (int i=0; i<15; i++) {
+            initial /= mult;
+            soundList.add(round(initial));
+        }
+        initial = 110;
+        for (int i=0; i<52; i++) {
+            initial *= mult;
+            soundList.add(round(initial));
+        }
+        //sort the list
+        Collections.sort(soundList);
+
         Object[][] listData = new Object[][]{
-                {"A", 500},
-                {"B", 600}
+
         };
         String[] colNames = {"Przycisk", "Częstotliwość"};
         model = new DefaultTableModel(listData, colNames);
+        //allow only to add freqs from list
+        JComboBox comboBox = new JComboBox();
+        for (Float f : soundList) {
+            comboBox.addItem(f);
+        }
         keyTable = new JTable(model);
+        TableColumn column = keyTable.getColumnModel().getColumn(1);
+        column.setCellEditor(new DefaultCellEditor(comboBox));
     }
 }
