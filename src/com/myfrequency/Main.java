@@ -63,26 +63,30 @@ public class Main extends JFrame implements Observer {
         return false;
     }
 
+    private float findNearestNumber(float num) {
+        float curr = soundList.get(0);
+        for (float f : soundList) {
+            if (Math.abs(num - f) < Math.abs(num - curr))
+                curr = f;
+        }
+        return curr;
+    }
+
     //perform operations on frequency change
     @Override
     public void update(Observable o, Object arg) {
         audio = (CaptureAudioObservable) o;
         float newFrequency = audio.getFrequency();
         freqLabel.setText("" + newFrequency);
-        //3000Hz will be max
+
         if (work && newFrequency < 2000 && newFrequency > 50) {
-            for (int i=0; i<soundList.size(); i++) {
-                if (soundList.get(i).compareTo(newFrequency) < 0) {
-                    float diffDown = (soundList.get(i) - soundList.get(i-1)) / 2;
-                    float diffUp = (soundList.get(i+1) - soundList.get(i)) / 2;
+            //find closest values and compare them
+            float nearestOld = findNearestNumber(frequency);
+            float nearestNew = findNearestNumber(newFrequency);
 
-
-                }
-            }
-
-            DefaultTableModel model = (DefaultTableModel) keyTable.getModel();
-            Vector vector = model.getDataVector();
-            for (Object obj : vector) {
+            if (Float.compare(nearestNew, nearestOld) == 0) {
+                DefaultTableModel model = (DefaultTableModel) keyTable.getModel();
+                Vector vector = model.getDataVector();
 
             }
         }

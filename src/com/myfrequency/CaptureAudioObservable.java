@@ -13,6 +13,7 @@ public class CaptureAudioObservable extends Observable {
 
     private final AudioFormat audioFormat;
     private float frequency;
+    private int magnitude;
 
     public float getFrequency() {
         return frequency;
@@ -68,10 +69,17 @@ public class CaptureAudioObservable extends Observable {
             //read data form input
             int length = targetDataLine.read(bufByte, 0, len);
             if (length > 0) {
-                float newFreq = process.doProcessing(bufByte);
-                //notify observers if found new frequency
-                if (Float.compare(newFreq, frequency) != 0)
-                    setFrequency(newFreq);
+                process.doProcessing(bufByte);
+                float newFreq = process.getFrequency();
+                int newMagn = process.getMaxMagnitude();
+                //notify observers if found new frequency with big magnitude
+                int limit = 1000;
+                if (Float.compare(newFreq, frequency) != 0 && (newMagn > limit)) {
+                    if (magnitude > limit) {
+                        setFrequency(newFreq);
+                    }
+                    magnitude = newMagn;
+                }
             }
         }
     }

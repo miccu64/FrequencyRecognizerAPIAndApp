@@ -13,6 +13,16 @@ public class ProcessSound {
     private final int len;
     //buf containing also older values
     private final float[] copiedBufFloat;
+    private float frequency;
+    private int maxMagnitude;
+
+    public float getFrequency() {
+        return frequency;
+    }
+
+    public int getMaxMagnitude() {
+        return maxMagnitude;
+    }
 
     public ProcessSound(AudioFormat _format) {
         format = _format;
@@ -24,7 +34,7 @@ public class ProcessSound {
         copiedBufFloat = new float[len];
     }
 
-    public float doProcessing(byte[] bufByte) {
+    public void doProcessing(byte[] bufByte) {
         //convert to floats and resample it
         float[] bufFloat = bytesToFloat(bufByte, format);
         //shift data in buffer and place some new data
@@ -65,7 +75,8 @@ public class ProcessSound {
         //Gaussian interpolation for getting in-between frequency
         double inter_bin = index + log(magnitudes[index+1]/magnitudes[index-1])*0.5/log(magnitudes[index]*magnitudes[index]/(magnitudes[index+1]*magnitudes[index-1]));
         double res = format.getSampleRate() * inter_bin / currentBuf.length;
-        return (float) Math.round(res * 10) / 10;
+        frequency = (float) Math.round(res * 10) / 10;
+        maxMagnitude = (int) max;
     }
 
     private Pair<float[], float[]> getRealAndImag (float[] bufFloat) {
