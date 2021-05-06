@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.*;
 import java.util.List;
@@ -19,6 +20,7 @@ public class Main extends JFrame implements Observer {
     private JButton deleteButton;
     private JButton startButton;
     private JButton stopButton;
+    private JLabel magnLabel;
 
     private float frequency = 0;
     private int magnitude = 0;
@@ -35,6 +37,7 @@ public class Main extends JFrame implements Observer {
     public Main() {
         JFrame frame = new JFrame("Graj przez częstotliwość");
         freqLabel.setFont(new Font(freqLabel.getFont().getName(), Font.PLAIN, 26));
+        magnLabel.setFont(new Font(freqLabel.getFont().getName(), Font.PLAIN, 16));
         frame.setContentPane(panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setMinimumSize(new Dimension(500, 500));
@@ -43,7 +46,6 @@ public class Main extends JFrame implements Observer {
 
         //adding new rows and deleting via buttons
         addButton.addActionListener(e -> {
-            //DefaultTableModel model = (DefaultTableModel) keyTable.getModel();
             model.addRow(new Object[]{"Przycisk", 0.});
         });
         deleteButton.addActionListener(e -> {
@@ -63,7 +65,6 @@ public class Main extends JFrame implements Observer {
             robot = new Robot();
         } catch (Exception ignored) {
         }
-
     }
 
     private float findNearestNumber(float num) {
@@ -82,28 +83,48 @@ public class Main extends JFrame implements Observer {
         float newFrequency = audio.getFrequency();
         int newMagnitude = audio.getMagnitude();
         freqLabel.setText("" + newFrequency);
+        magnLabel.setText("" + newMagnitude);
 
         //find closest value corresponding to particular fret on guitar
         float nearestNewFreq = findNearestNumber(newFrequency);
 
-        int limit = 1000;//CHANGE LLIMIIIIT
+        //based just on my observations
+        int limit = 1200;
         int compare = Float.compare(nearestNewFreq, frequency);
 
         if (work && newFrequency < 2000 && newFrequency > 48 && newMagnitude > limit && magnitude > limit && compare == 0) {
             //find corresponding key and press it
             for (int i = 0; i < model.getRowCount(); i++) {
-                Double freqFromTable = (Double) model.getValueAt(i, 1);
-                if (Float.compare(freqFromTable.floatValue(), nearestNewFreq) == 0) {
+                Float freqFromTable = (Float) model.getValueAt(i, 1);
+                if (Float.compare(freqFromTable, nearestNewFreq) == 0) {
                     String key = (String) model.getValueAt(i, 0);
                     //if it's ASCII char, press corresponding button
                     if (key.length() == 1) {
-                        int pressedKey = key.charAt(0);
+                        pressedKey = key.charAt(0);
                         robot.keyPress(pressedKey);
+                    } else {
+                        switch (key) {
+                            case "LPM":
+                                robot.mousePress(InputEvent.BUTTON1_MASK);
+                                break;
+                            case "PPM":
+                                robot.mousePress(InputEvent.BUTTON2_MASK);
+                                break;
+                            case "Spacja":
+                                robot.mousePress(KeyEvent.VK_SPACE);
+                                break;
+                            //https://stackoverflow.com/questions/4231458/moving-the-cursor-in-java
+                        }
                     }
                     break;
                 }
             }
-        }
+        } else try {
+            //needed try, bcs pressedKey contains mouse or key id
+            robot.keyRelease(pressedKey);
+            robot.mouseRelease(pressedKey);
+        } catch (Exception ignored) { }
+
         //overwrite with newest values
         frequency = nearestNewFreq;
         magnitude = newMagnitude;
@@ -144,8 +165,8 @@ public class Main extends JFrame implements Observer {
         Collections.sort(soundList);
 
         Object[][] listData = new Object[][]{
-                {"A", 87.3},
-                {"D", 92.5}
+                {"A", (float) 146.8},
+                {"D", (float) 155.6}
         };
         String[] colNames = {"Przycisk", "Częstotliwość"};
         model = new DefaultTableModel(listData, colNames);
@@ -162,9 +183,12 @@ public class Main extends JFrame implements Observer {
         //set keys for choice in the GUI
         column = keyTable.getColumnModel().getColumn(0);
         comboBox = new JComboBox();
-        comboBox.addItem("LPM");
-        comboBox.addItem("PPM");
-        comboBox.addItem("Spacja");
+        List<String> strList = new ArrayList<>(
+                Arrays.asList("LPM", "PPM", "Spacja", "MyszLewo", "MyszPrawo", "MyszDol", "MyszGora")
+        );
+        for (String s : strList) {
+            comboBox.addItem(s);
+        }
         for (int ascii = 65; ascii <= 90; ascii++) {
             char c = (char) ascii;
             comboBox.addItem(c);

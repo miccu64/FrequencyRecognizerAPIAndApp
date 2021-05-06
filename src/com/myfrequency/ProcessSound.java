@@ -29,7 +29,7 @@ public class ProcessSound {
         //init FFT with number of FFTsamples, which we want to get
         //that's why we need to derive by frame size
         //frameSize can take 1 or 2 places in buffer
-        len = (int) (format.getSampleRate() / format.getFrameSize() * 2);//*2 to get longer buffer
+        len = (int) (format.getSampleRate() / format.getFrameSize() / 2);// /2 to get shorter buffer and faster changes
         fft = new FloatFFT_1D(len);
         copiedBufFloat = new float[len];
     }
