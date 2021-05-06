@@ -4,12 +4,14 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.util.*;
 import java.util.List;
 
 public class Main extends JFrame implements Observer {
     //instance for audio capture
     private static CaptureAudioObservable audio;
+
     private JPanel panel1;
     private JLabel freqLabel;
     private JTable keyTable;
@@ -17,12 +19,17 @@ public class Main extends JFrame implements Observer {
     private JButton deleteButton;
     private JButton startButton;
     private JButton stopButton;
+
     private float frequency = 0;
+    private int magnitude = 0;
     private boolean work;
     //model for changing data from GUI
     private DefaultTableModel model;
     //contains possible sounds in Hz
     private List<Float> soundList;
+    //for key pressing
+    private Robot robot;
+    int pressedKey = 0;
 
     //init GUI
     public Main() {
@@ -36,12 +43,12 @@ public class Main extends JFrame implements Observer {
 
         //adding new rows and deleting via buttons
         addButton.addActionListener(e -> {
-            DefaultTableModel model = (DefaultTableModel) keyTable.getModel();
-            model.addRow(new Object[] {"a", 0});
+            //DefaultTableModel model = (DefaultTableModel) keyTable.getModel();
+            model.addRow(new Object[]{"Przycisk", 0.});
         });
         deleteButton.addActionListener(e -> {
             int[] rows = keyTable.getSelectedRows();
-            for(int i=0; i<rows.length; i++) {
+            for (int i = 0; i < rows.length; i++) {
                 model.removeRow(rows[i] - i);
             }
         });
@@ -51,16 +58,12 @@ public class Main extends JFrame implements Observer {
         stopButton.addActionListener(e -> {
             work = false;
         });
-    }
 
-    private boolean compareFreq(double freq1, double freq2) {
-        //fast compare for big difference to improve optimization
-        if (Math.abs(freq1-freq2) > 150)
-            return false;
-        double res = 110;
-        double root = Math.pow(2, (double) 1/12);//ZZACZYNA SIE OD A (110Hz)
-        //dzieli sie lub mnozy x razy przez to
-        return false;
+        try {
+            robot = new Robot();
+        } catch (Exception ignored) {
+        }
+
     }
 
     private float findNearestNumber(float num) {
@@ -77,20 +80,33 @@ public class Main extends JFrame implements Observer {
     public void update(Observable o, Object arg) {
         audio = (CaptureAudioObservable) o;
         float newFrequency = audio.getFrequency();
+        int newMagnitude = audio.getMagnitude();
         freqLabel.setText("" + newFrequency);
 
-        if (work && newFrequency < 2000 && newFrequency > 50) {
-            //find closest values and compare them
-            float nearestOld = findNearestNumber(frequency);
-            float nearestNew = findNearestNumber(newFrequency);
+        //find closest value corresponding to particular fret on guitar
+        float nearestNewFreq = findNearestNumber(newFrequency);
 
-            if (Float.compare(nearestNew, nearestOld) == 0) {
-                DefaultTableModel model = (DefaultTableModel) keyTable.getModel();
-                Vector vector = model.getDataVector();
+        int limit = 1000;//CHANGE LLIMIIIIT
+        int compare = Float.compare(nearestNewFreq, frequency);
 
+        if (work && newFrequency < 2000 && newFrequency > 48 && newMagnitude > limit && magnitude > limit && compare == 0) {
+            //find corresponding key and press it
+            for (int i = 0; i < model.getRowCount(); i++) {
+                Double freqFromTable = (Double) model.getValueAt(i, 1);
+                if (Float.compare(freqFromTable.floatValue(), nearestNewFreq) == 0) {
+                    String key = (String) model.getValueAt(i, 0);
+                    //if it's ASCII char, press corresponding button
+                    if (key.length() == 1) {
+                        int pressedKey = key.charAt(0);
+                        robot.keyPress(pressedKey);
+                    }
+                    break;
+                }
             }
         }
-        frequency = newFrequency;
+        //overwrite with newest values
+        frequency = nearestNewFreq;
+        magnitude = newMagnitude;
     }
 
     public static void main(String[] args) {
@@ -110,17 +126,17 @@ public class Main extends JFrame implements Observer {
     }
 
     private void createUIComponents() {
-        //init soundSet - start from 110Hz and derive/multiply it by mult
+        //init soundSet - start from 110Hz and derive/multiply it by mult (special equation)
         soundList = new ArrayList<>();
         float initial = 110;
         soundList.add(initial);
-        float mult = (float) Math.pow(2, (double) 1/12);
-        for (int i=0; i<15; i++) {
+        float mult = (float) Math.pow(2, (double) 1 / 12);
+        for (int i = 0; i < 15; i++) {
             initial /= mult;
             soundList.add(round(initial));
         }
         initial = 110;
-        for (int i=0; i<52; i++) {
+        for (int i = 0; i < 52; i++) {
             initial *= mult;
             soundList.add(round(initial));
         }
@@ -128,7 +144,8 @@ public class Main extends JFrame implements Observer {
         Collections.sort(soundList);
 
         Object[][] listData = new Object[][]{
-
+                {"A", 87.3},
+                {"D", 92.5}
         };
         String[] colNames = {"Przycisk", "Częstotliwość"};
         model = new DefaultTableModel(listData, colNames);
@@ -138,7 +155,20 @@ public class Main extends JFrame implements Observer {
             comboBox.addItem(f);
         }
         keyTable = new JTable(model);
+        //set freqs for choice in GUI
         TableColumn column = keyTable.getColumnModel().getColumn(1);
+        column.setCellEditor(new DefaultCellEditor(comboBox));
+
+        //set keys for choice in the GUI
+        column = keyTable.getColumnModel().getColumn(0);
+        comboBox = new JComboBox();
+        comboBox.addItem("LPM");
+        comboBox.addItem("PPM");
+        comboBox.addItem("Spacja");
+        for (int ascii = 65; ascii <= 90; ascii++) {
+            char c = (char) ascii;
+            comboBox.addItem(c);
+        }
         column.setCellEditor(new DefaultCellEditor(comboBox));
     }
 }

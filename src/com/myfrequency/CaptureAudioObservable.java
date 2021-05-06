@@ -19,9 +19,14 @@ public class CaptureAudioObservable extends Observable {
         return frequency;
     }
 
-    private void setFrequency(float _freq) {
+    public int getMagnitude() {
+        return magnitude;
+    }
+
+    private void setFrequencyAndMagnitude(float _freq, int _magn) {
         //notify observers about change in frequency
         frequency = _freq;
+        magnitude = _magn;
         setChanged();
         notifyObservers();
     }
@@ -73,13 +78,7 @@ public class CaptureAudioObservable extends Observable {
                 float newFreq = process.getFrequency();
                 int newMagn = process.getMaxMagnitude();
                 //notify observers if found new frequency with big magnitude
-                int limit = 1000;
-                if (Float.compare(newFreq, frequency) != 0 && (newMagn > limit)) {
-                    if (magnitude > limit) {
-                        setFrequency(newFreq);
-                    }
-                    magnitude = newMagn;
-                }
+                setFrequencyAndMagnitude(newFreq, newMagn);
             }
         }
     }
