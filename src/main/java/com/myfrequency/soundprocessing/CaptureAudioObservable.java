@@ -1,4 +1,4 @@
-package com.myfrequency;
+package com.myfrequency.soundprocessing;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;

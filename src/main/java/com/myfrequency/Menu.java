@@ -1,5 +1,7 @@
 package com.myfrequency;
 
+import com.myfrequency.soundprocessing.CaptureAudioObservable;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -9,7 +11,7 @@ import java.awt.event.KeyEvent;
 import java.util.*;
 import java.util.List;
 
-public class Main extends JFrame implements Observer {
+public class Menu extends JFrame implements Observer {
     //instance for audio capture
     private static CaptureAudioObservable audio;
 
@@ -34,7 +36,7 @@ public class Main extends JFrame implements Observer {
     int pressedKey = 0;
 
     //init GUI
-    public Main() {
+    public Menu() {
         JFrame frame = new JFrame("Graj przez częstotliwość");
         freqLabel.setFont(new Font(freqLabel.getFont().getName(), Font.PLAIN, 26));
         magnLabel.setFont(new Font(freqLabel.getFont().getName(), Font.PLAIN, 16));
@@ -134,7 +136,7 @@ public class Main extends JFrame implements Observer {
         //make observer for notifying when frequency is changed
         audio = new CaptureAudioObservable();
         //GUI open
-        Main observer = new Main();
+        Menu observer = new Menu();
         audio.addObserver(observer);
         audio.captureAudio();
     }

@@ -1,4 +1,4 @@
-package com.myfrequency;
+package com.myfrequency.soundprocessing;
 
 import javafx.util.Pair;
 import org.jtransforms.fft.FloatFFT_1D;
