@@ -1,6 +1,8 @@
 package com.myfrequency;
 
 import com.myfrequency.soundprocessing.CaptureAudioObservable;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -11,6 +13,7 @@ import java.awt.event.KeyEvent;
 import java.util.*;
 import java.util.List;
 
+@SpringBootApplication
 public class Menu extends JFrame implements Observer {
     //instance for audio capture
     private static CaptureAudioObservable audio;
@@ -67,6 +70,8 @@ public class Menu extends JFrame implements Observer {
             robot = new Robot();
         } catch (Exception ignored) {
         }
+
+        audio.addObserver(this);
     }
 
     private float findNearestNumber(float num) {
@@ -135,10 +140,12 @@ public class Menu extends JFrame implements Observer {
     public static void main(String[] args) {
         //make observer for notifying when frequency is changed
         audio = new CaptureAudioObservable();
-        //GUI open
-        Menu observer = new Menu();
-        audio.addObserver(observer);
-        audio.captureAudio();
+
+        //make thread for allow working mic capture and Spring at the same time
+        Thread thread = new Thread(() -> audio.captureAudio());
+        thread.start();
+
+        SpringApplication.run(Menu.class, args);
     }
 
     private float round(float num) {
