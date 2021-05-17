@@ -12,6 +12,7 @@ public class WebSocketController {
         return false;
     }
 
+    //connected/sendData
     @MessageMapping("/sendData")
     @SendTo("/freqPlay/connected")
     public ResultModel result(FreqMagnModel message) {
