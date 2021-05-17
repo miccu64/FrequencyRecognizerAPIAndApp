@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.myfrequency.Menu">
-  <grid id="27dc6" binding="panel1" default-binding="true" layout-manager="GridLayoutManager" row-count="7" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="panel1" default-binding="true" layout-manager="GridLayoutManager" row-count="8" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="11" left="11" bottom="11" right="11"/>
     <constraints>
       <xy x="20" y="20" width="674" height="1139"/>
@@ -97,6 +97,14 @@
         </constraints>
         <properties>
           <text value="B/d"/>
+        </properties>
+      </component>
+      <component id="fa43b" class="javax.swing.JButton" binding="sourceButton">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Źródło: komputer"/>
         </properties>
       </component>
     </children>
