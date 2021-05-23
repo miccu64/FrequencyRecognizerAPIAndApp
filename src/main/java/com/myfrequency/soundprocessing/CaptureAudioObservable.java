@@ -1,5 +1,7 @@
 package com.myfrequency.soundprocessing;
 
+import com.myfrequency.models.FreqMagnModel;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
@@ -12,23 +14,11 @@ import static java.lang.Thread.sleep;
 public class CaptureAudioObservable extends Observable {
 
     private final AudioFormat audioFormat;
-    private float frequency;
-    private int magnitude;
 
-    public float getFrequency() {
-        return frequency;
-    }
-
-    public int getMagnitude() {
-        return magnitude;
-    }
-
-    private void setFrequencyAndMagnitude(float _freq, int _magn) {
+    private void setFrequencyAndMagnitude(float freq, int magn) {
         //notify observers about change in frequency
-        frequency = _freq;
-        magnitude = _magn;
         setChanged();
-        notifyObservers();
+        notifyObservers(new FreqMagnModel(freq, magn, false));
     }
 
     public CaptureAudioObservable() {

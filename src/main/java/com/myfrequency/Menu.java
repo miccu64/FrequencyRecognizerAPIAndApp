@@ -2,17 +2,16 @@ package com.myfrequency;
 
 import com.myfrequency.models.FreqMagnModel;
 import com.myfrequency.models.ResultModel;
-import com.myfrequency.models.TransportSingleton;
 import com.myfrequency.soundprocessing.CaptureAudioObservable;
+import com.myfrequency.websocket.WebSocketController;
+import com.myfrequency.websocket.WebSocketEventListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.messaging.simp.user.SimpUserRegistry;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import javax.xml.transform.Result;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -44,7 +43,12 @@ public class Menu extends JFrame implements Observer {
     //for key pressing
     private Robot robot;
     int pressedKey = 0;
-    private boolean source;
+    private boolean fromPhone;
+
+    @Autowired
+    WebSocketController webSocket;
+    @Autowired
+    WebSocketEventListener listener;
 
     //init GUI
     public Menu() {
@@ -74,15 +78,16 @@ public class Menu extends JFrame implements Observer {
             work = false;
         });
         sourceButton.addActionListener(e -> {
-            if (!source) {
-                if (TransportSingleton.getInstance().usersCount < 1) {
+            if (!fromPhone) {
+                if (listener.getUsersCount() < 1) {
                     sourceButton.setText("Brak połączonego klienta");
                 } else {
-                    source = true;
+                    webSocket.addObserver(this);
+                    fromPhone = true;
                     sourceButton.setText("Źródło: telefon");
                 }
             } else {
-                source = false;
+                fromPhone = false;
                 sourceButton.setText("Źródło: komputer");
             }
         });
@@ -107,16 +112,15 @@ public class Menu extends JFrame implements Observer {
     //perform operations on frequency change
     @Override
     public void update(Observable o, Object arg) {
-        audio = (CaptureAudioObservable) o;
-        float newFrequency = audio.getFrequency();
-        int newMagnitude = audio.getMagnitude();
+        FreqMagnModel freqMagnModel = (FreqMagnModel) arg;
 
-        //true = take from Spring Boot
-        if (source && TransportSingleton.getInstance().usersCount > 0) {
-            FreqMagnModel f = TransportSingleton.getInstance().model;
-            newFrequency = f.getFrequency();
-            newMagnitude = f.getMagnitude();
+        //if invoked by not used source - ignore result
+        if (freqMagnModel == null || freqMagnModel.getIsPhone() != fromPhone) {
+            return;
         }
+
+        float newFrequency = freqMagnModel.getFrequency();
+        int newMagnitude = freqMagnModel.getMagnitude();
 
         freqLabel.setText("" + newFrequency);
         magnLabel.setText("" + newMagnitude);
@@ -129,14 +133,18 @@ public class Menu extends JFrame implements Observer {
         int compare = Float.compare(nearestNewFreq, frequency);
 
         //for send response to phone
-        ResultModel r;
-        if (newMagnitude > limit)
-            r = new ResultModel(nearestNewFreq, true);
-        else r = new ResultModel(nearestNewFreq, false);
-        TransportSingleton.getInstance().resultModel = r;
+        if (freqMagnModel.getIsPhone()) {
+            ResultModel result;
+            if (newMagnitude > limit)
+                result = new ResultModel(nearestNewFreq, true);
+            else result = new ResultModel(nearestNewFreq, false);
+
+            WebSocketController w = (WebSocketController) o;
+            w.sendResult(result);
+        }
 
         if (work && newFrequency < 2000 && newFrequency > 48 && newMagnitude > limit && magnitude > limit && compare == 0) {
-            //find corresponding key and press it
+            //find corresponding key in table and press it
             for (int i = 0; i < model.getRowCount(); i++) {
                 Float freqFromTable = (Float) model.getValueAt(i, 1);
                 if (Float.compare(freqFromTable, nearestNewFreq) == 0) {
