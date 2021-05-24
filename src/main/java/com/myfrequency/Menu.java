@@ -42,9 +42,10 @@ public class Menu extends JFrame implements Observer {
     private List<Float> soundList;
     //for key pressing
     private Robot robot;
-    int pressedKey = 0;
+    private int pressedKey = 0;
     private boolean fromPhone;
 
+    //for getting callback when get info from phone
     @Autowired
     WebSocketController webSocket;
     @Autowired
@@ -122,20 +123,20 @@ public class Menu extends JFrame implements Observer {
         float newFrequency = freqMagnModel.getFrequency();
         int newMagnitude = freqMagnModel.getMagnitude();
 
-        freqLabel.setText("" + newFrequency);
-        magnLabel.setText("" + newMagnitude);
-
         //find closest value corresponding to particular fret on guitar
         float nearestNewFreq = findNearestNumber(newFrequency);
 
         //based just on my observations
-        int limit = 1200;
+        int limit = 1;
         int compare = Float.compare(nearestNewFreq, frequency);
+
+        freqLabel.setText("" + newFrequency);
+        magnLabel.setText("" + newMagnitude);
 
         //for send response to phone
         if (freqMagnModel.getIsPhone()) {
             ResultModel result;
-            if (newMagnitude > limit)
+            if (Float.compare(newMagnitude, limit) >= 0)
                 result = new ResultModel(nearestNewFreq, true);
             else result = new ResultModel(nearestNewFreq, false);
 
@@ -143,7 +144,8 @@ public class Menu extends JFrame implements Observer {
             w.sendResult(result);
         }
 
-        if (work && newFrequency < 2000 && newFrequency > 48 && newMagnitude > limit && magnitude > limit && compare == 0) {
+        if (work && newFrequency < 2000 && newFrequency > 48 && Float.compare(newMagnitude, limit) >= 0 &&
+                Float.compare(magnitude, limit) >= 0 && compare == 0) {
             //find corresponding key in table and press it
             for (int i = 0; i < model.getRowCount(); i++) {
                 Float freqFromTable = (Float) model.getValueAt(i, 1);
@@ -154,6 +156,7 @@ public class Menu extends JFrame implements Observer {
                         pressedKey = key.charAt(0);
                         robot.keyPress(pressedKey);
                     } else {
+                        Point current = MouseInfo.getPointerInfo().getLocation();
                         switch (key) {
                             case "LPM":
                                 robot.mousePress(InputEvent.BUTTON1_MASK);
@@ -164,7 +167,18 @@ public class Menu extends JFrame implements Observer {
                             case "Spacja":
                                 robot.mousePress(KeyEvent.VK_SPACE);
                                 break;
-                            //https://stackoverflow.com/questions/4231458/moving-the-cursor-in-java
+                            case "MyszLewo":
+                                robot.mouseMove(current.x - 100, current.y);
+                                break;
+                            case "MyszPrawo":
+                                robot.mouseMove(current.x + 100, current.y);
+                                break;
+                            case "MyszDol":
+                                robot.mouseMove(current.x, current.y  - 100);
+                                break;
+                            case "MyszGora":
+                                robot.mouseMove(current.x, + 100);
+                                break;
                         }
                     }
                     break;
@@ -219,7 +233,8 @@ public class Menu extends JFrame implements Observer {
 
         Object[][] listData = new Object[][]{
                 {"A", (float) 146.8},
-                {"D", (float) 155.6}
+                {"D", (float) 155.6},
+                {"MyszLewo", (float) 174.6}
         };
         String[] colNames = {"Przycisk", "Częstotliwość"};
         model = new DefaultTableModel(listData, colNames);
