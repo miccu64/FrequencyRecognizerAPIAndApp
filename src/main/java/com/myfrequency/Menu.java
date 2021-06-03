@@ -177,7 +177,7 @@ public class Menu extends JFrame implements Observer {
                                 robot.mouseMove(current.x, current.y  - 100);
                                 break;
                             case "MyszGora":
-                                robot.mouseMove(current.x, + 100);
+                                robot.mouseMove(current.x, current.y + 100);
                                 break;
                         }
                     }
@@ -234,7 +234,12 @@ public class Menu extends JFrame implements Observer {
         Object[][] listData = new Object[][]{
                 {"A", (float) 146.8},
                 {"D", (float) 155.6},
-                {"MyszLewo", (float) 174.6}
+                {"W", (float) 164.8},
+                {"S", (float) 174.6},
+                {"MyszLewo", (float) 185.0},
+                {"MyszPrawo", (float) 196.0},
+                {"MyszGora", (float) 207.7},
+                {"MyszDol", (float) 220.0}
         };
         String[] colNames = {"Przycisk", "Częstotliwość"};
         model = new DefaultTableModel(listData, colNames);

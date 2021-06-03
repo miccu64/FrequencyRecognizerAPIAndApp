@@ -24,10 +24,10 @@ public class CaptureAudioObservable extends Observable {
     public CaptureAudioObservable() {
         //set up capture parameters
         float sampleRate = 8000;//8000,16000,22050,44100 - only even numbers
-        int sampleSizeInBits = 16;//8,16
-        int channels = 1;//only 1 will work
-        boolean signed = true;//works for me only with true
-        boolean bigEndian = false;//false - the script is written for little endian
+        int sampleSizeInBits = 8;//8,16
+        int channels = 1;//only 1 will work there
+        boolean signed = false;//with false I can get good magnitude, but can't use bigger frequencies bcs of init mic errors
+        boolean bigEndian = true;//script is written for big endian
         audioFormat = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
     }
 
@@ -58,7 +58,7 @@ public class CaptureAudioObservable extends Observable {
         int len = (int) audioFormat.getSampleRate() * audioFormat.getFrameSize() / 5;
 
         byte[] bufByte = new byte[len];
-        ProcessSound process = new ProcessSound(audioFormat);
+        ProcessSound process = new ProcessSound(audioFormat, len);
 
         while (true) {
             //read data form input
@@ -67,7 +67,7 @@ public class CaptureAudioObservable extends Observable {
                 process.doProcessing(bufByte);
                 float newFreq = process.getFrequency();
                 int newMagn = process.getMaxMagnitude();
-                //notify observers if found new frequency with big magnitude
+                //notify observers if found new frequency
                 setFrequencyAndMagnitude(newFreq, newMagn);
             }
         }
