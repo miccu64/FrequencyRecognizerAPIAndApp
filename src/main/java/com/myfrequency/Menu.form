@@ -10,20 +10,6 @@
     </properties>
     <border type="none"/>
     <children>
-      <component id="3b2dd" class="javax.swing.JLabel" binding="freqLabel">
-        <constraints>
-          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="1" fill="0" indent="0" use-parent-layout="false">
-            <minimum-size width="200" height="36"/>
-          </grid>
-        </constraints>
-        <properties>
-          <enabled value="true"/>
-          <horizontalAlignment value="0"/>
-          <horizontalTextPosition value="0"/>
-          <text value="0"/>
-          <verticalTextPosition value="0"/>
-        </properties>
-      </component>
       <scrollpane id="75e6e">
         <constraints>
           <grid row="4" column="0" row-span="1" col-span="3" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -99,6 +85,15 @@
           <text value="0"/>
         </properties>
       </component>
+      <component id="a5654" class="javax.swing.JLabel" binding="stateLabel">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <enabled value="true"/>
+          <text value="Status: zatrzymany"/>
+        </properties>
+      </component>
       <component id="fa43b" class="javax.swing.JButton" binding="sourceButton">
         <constraints>
           <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
@@ -106,6 +101,68 @@
         <properties>
           <text value="Źródło: komputer"/>
         </properties>
+      </component>
+      <component id="e73ac" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Silny dźwięk"/>
+        </properties>
+      </component>
+      <component id="b3602" class="javax.swing.JLabel" binding="strongLabel">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="nie"/>
+        </properties>
+      </component>
+      <component id="ce8d7" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Rozpoznana częstotl."/>
+        </properties>
+      </component>
+      <component id="ba7b" class="javax.swing.JLabel" binding="foundFreqLabel">
+        <constraints>
+          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="0"/>
+        </properties>
+      </component>
+      <component id="ef464" class="javax.swing.JLabel" binding="freqLabel">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="1" fill="0" indent="0" use-parent-layout="false">
+            <minimum-size width="200" height="36"/>
+          </grid>
+        </constraints>
+        <properties>
+          <enabled value="true"/>
+          <horizontalAlignment value="0"/>
+          <horizontalTextPosition value="0"/>
+          <text value="0"/>
+          <verticalTextPosition value="0"/>
+        </properties>
+      </component>
+      <component id="97c4e" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Minimalna magnituda"/>
+        </properties>
+      </component>
+      <component id="553d" class="javax.swing.JSpinner" binding="magnSpinner" custom-create="true">
+        <constraints>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false">
+            <minimum-size width="22" height="16"/>
+          </grid>
+        </constraints>
+        <properties/>
       </component>
     </children>
   </grid>

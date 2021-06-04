@@ -34,9 +34,9 @@ public class ProcessSound {
     public void doProcessing(byte[] bufByte) {
         //convert to floats and resample it
         float[] bufFloat = bytesToFloat(bufByte);
-        doNormalization(bufFloat);
-        doWindowing(bufFloat);
 
+        doWindowing(bufFloat);
+        doNormalization(bufFloat);
         //realForward, bcs we have got real data
         fft.realForward(bufFloat);
 
@@ -49,13 +49,11 @@ public class ProcessSound {
         //from 2, bcs 0Hz is not useful in DSP and 1 is not necessary
         //bin 0 is the 0 Hz term and is equivalent to the average of all the samples in the window
         //MY MIC FREQ SPAN - 100 Hz–10 kHz
-        double magnSum = magnitudes[1] + magnitudes[0];
         for (int i=2; i<magnitudes.length; i++) {
             if (magnitudes[i] > max){
                 max = magnitudes[i];
                 index = i;
             }
-            magnSum += magnitudes[i];
         }
 
         //Gaussian interpolation for getting in-between frequency
@@ -66,7 +64,6 @@ public class ProcessSound {
         //N = FFT size
         double res = format.getSampleRate() * inter_bin / len;
         frequency = (float) Math.round(res * 10) / 10;
-        magnSum /= (double) len /2;
         maxMagnitude = (int) max;
     }
 

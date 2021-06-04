@@ -61,7 +61,7 @@ public class CaptureAudioObservable extends Observable {
         ProcessSound process = new ProcessSound(audioFormat, len);
 
         while (true) {
-            //read data form input
+            //read data from input
             int length = targetDataLine.read(bufByte, 0, len);
             if (length > 0) {
                 process.doProcessing(bufByte);

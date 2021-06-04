@@ -10,6 +10,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import java.awt.*;
@@ -32,6 +34,10 @@ public class Menu extends JFrame implements Observer {
     private JButton stopButton;
     private JLabel magnLabel;
     private JButton sourceButton;
+    private JLabel stateLabel;
+    private JLabel strongLabel;
+    private JLabel foundFreqLabel;
+    private JSpinner magnSpinner;
 
     private float frequency = 0;
     private int magnitude = 0;
@@ -44,6 +50,7 @@ public class Menu extends JFrame implements Observer {
     private Robot robot;
     private int pressedKey = 0;
     private boolean fromPhone;
+    private int minMagn = 3;
 
     //for getting callback when get info from phone
     @Autowired
@@ -64,7 +71,7 @@ public class Menu extends JFrame implements Observer {
 
         //adding new rows and deleting via buttons
         addButton.addActionListener(e -> {
-            model.addRow(new Object[]{"Przycisk", 0.});
+            model.addRow(new Object[]{"Przycisk", (float) 0.});
         });
         deleteButton.addActionListener(e -> {
             int[] rows = keyTable.getSelectedRows();
@@ -74,14 +81,16 @@ public class Menu extends JFrame implements Observer {
         });
         startButton.addActionListener(e -> {
             work = true;
+            stateLabel.setText("Status: działa");
         });
         stopButton.addActionListener(e -> {
             work = false;
+            stateLabel.setText("Status: zatrzymany");
         });
         sourceButton.addActionListener(e -> {
             if (!fromPhone) {
                 if (listener.getUsersCount() < 1) {
-                    sourceButton.setText("Brak połączonego klienta");
+                    sourceButton.setText("Brak połączenia");
                 } else {
                     webSocket.addObserver(this);
                     fromPhone = true;
@@ -91,6 +100,10 @@ public class Menu extends JFrame implements Observer {
                 fromPhone = false;
                 sourceButton.setText("Źródło: komputer");
             }
+        });
+        magnSpinner.addChangeListener(e -> {
+            JSpinner spinner = (JSpinner) e.getSource();
+            minMagn = (int) spinner.getValue();
         });
 
         try {
@@ -125,18 +138,20 @@ public class Menu extends JFrame implements Observer {
 
         //find closest value corresponding to particular fret on guitar
         float nearestNewFreq = findNearestNumber(newFrequency);
-
-        //based just on my observations
-        int limit = 1;
         int compare = Float.compare(nearestNewFreq, frequency);
 
+        int strongEnough = Float.compare(newMagnitude, minMagn);
+        if (strongEnough >= 0)
+            strongLabel.setText("tak");
+        else strongLabel.setText("nie");
         freqLabel.setText("" + newFrequency);
         magnLabel.setText("" + newMagnitude);
+        foundFreqLabel.setText("" + nearestNewFreq);
 
-        //for send response to phone
+        //send response to phone
         if (freqMagnModel.getIsPhone()) {
             ResultModel result;
-            if (Float.compare(newMagnitude, limit) >= 0)
+            if (Float.compare(newMagnitude, minMagn) >= 0)
                 result = new ResultModel(nearestNewFreq, true);
             else result = new ResultModel(nearestNewFreq, false);
 
@@ -144,13 +159,14 @@ public class Menu extends JFrame implements Observer {
             w.sendResult(result);
         }
 
-        if (work && newFrequency < 2000 && newFrequency > 48 && Float.compare(newMagnitude, limit) >= 0 &&
-                Float.compare(magnitude, limit) >= 0 && compare == 0) {
+        if (work && newFrequency < 2000 && newFrequency > 48 && strongEnough >= 0 &&
+                Float.compare(magnitude, minMagn) >= 0 && compare == 0) {
             //find corresponding key in table and press it
             for (int i = 0; i < model.getRowCount(); i++) {
                 Float freqFromTable = (Float) model.getValueAt(i, 1);
                 if (Float.compare(freqFromTable, nearestNewFreq) == 0) {
                     String key = (String) model.getValueAt(i, 0);
+
                     //if it's ASCII char, press corresponding button
                     if (key.length() == 1) {
                         pressedKey = key.charAt(0);
@@ -185,7 +201,7 @@ public class Menu extends JFrame implements Observer {
                 }
             }
         } else try {
-            //needed try, bcs pressedKey contains mouse or key id
+            //needed try to release keys, bcs pressedKey contains mouse or key id
             robot.keyRelease(pressedKey);
             robot.mouseRelease(pressedKey);
         } catch (Exception ignored) { }
@@ -267,5 +283,9 @@ public class Menu extends JFrame implements Observer {
             comboBox.addItem(c);
         }
         column.setCellEditor(new DefaultCellEditor(comboBox));
+
+        SpinnerNumberModel model = new SpinnerNumberModel(2, 0, 111, 1);
+        magnSpinner = new JSpinner(model);
+        //add(spinner);
     }
 }
