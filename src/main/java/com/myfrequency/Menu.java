@@ -49,6 +49,7 @@ public class Menu extends JFrame implements Observer {
     //for key pressing
     private Robot robot;
     private int pressedKey = 0;
+    private int pressedMouse = 0;
     private boolean fromPhone;
     private int minMagn = 3;
 
@@ -159,7 +160,7 @@ public class Menu extends JFrame implements Observer {
             w.sendResult(result);
         }
 
-        if (work && newFrequency < 2000 && newFrequency > 48 && strongEnough >= 0 &&
+        if (work && newFrequency < 2400 && newFrequency > 48 && strongEnough >= 0 &&
                 Float.compare(magnitude, minMagn) >= 0 && compare == 0) {
             //find corresponding key in table and press it
             for (int i = 0; i < model.getRowCount(); i++) {
@@ -175,13 +176,16 @@ public class Menu extends JFrame implements Observer {
                         Point current = MouseInfo.getPointerInfo().getLocation();
                         switch (key) {
                             case "LPM":
-                                robot.mousePress(InputEvent.BUTTON1_MASK);
+                                pressedMouse = InputEvent.BUTTON1_MASK;
+                                robot.mousePress(pressedMouse);
                                 break;
                             case "PPM":
-                                robot.mousePress(InputEvent.BUTTON2_MASK);
+                                pressedMouse = InputEvent.BUTTON3_MASK;
+                                robot.mousePress(pressedMouse);
                                 break;
                             case "Spacja":
-                                robot.mousePress(KeyEvent.VK_SPACE);
+                                pressedKey = KeyEvent.VK_SPACE;
+                                robot.keyPress(pressedKey);
                                 break;
                             case "MyszLewo":
                                 robot.mouseMove(current.x - 100, current.y);
@@ -189,10 +193,10 @@ public class Menu extends JFrame implements Observer {
                             case "MyszPrawo":
                                 robot.mouseMove(current.x + 100, current.y);
                                 break;
-                            case "MyszDol":
+                            case "MyszGora":
                                 robot.mouseMove(current.x, current.y  - 100);
                                 break;
-                            case "MyszGora":
+                            case "MyszDol":
                                 robot.mouseMove(current.x, current.y + 100);
                                 break;
                         }
@@ -203,9 +207,12 @@ public class Menu extends JFrame implements Observer {
         } else try {
             //needed try to release keys, bcs pressedKey contains mouse or key id
             robot.keyRelease(pressedKey);
-            robot.mouseRelease(pressedKey);
         } catch (Exception ignored) { }
-
+        try {
+            //needed try to release keys, bcs pressedKey contains mouse or key id
+            robot.mouseRelease(pressedMouse);
+            pressedMouse = 0;
+        } catch (Exception ignored) { }
         //overwrite with newest values
         frequency = nearestNewFreq;
         magnitude = newMagnitude;
@@ -280,7 +287,7 @@ public class Menu extends JFrame implements Observer {
         }
         for (int ascii = 65; ascii <= 90; ascii++) {
             char c = (char) ascii;
-            comboBox.addItem(c);
+            comboBox.addItem(Character.toString(c));
         }
         column.setCellEditor(new DefaultCellEditor(comboBox));
 
